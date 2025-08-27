@@ -1,0 +1,66 @@
+package com.example.to_do_list_api.api.exceptionhandling;
+
+import com.example.to_do_list_api.domain.exceptions.EmailExistsException;
+import com.example.to_do_list_api.domain.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    public ErrorResponse handleException(ResourceNotFoundException ex) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailExistsException.class)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleException(EmailExistsException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFormatException.class)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleException(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+        if (cause instanceof InvalidFormatException ife && ife.getTargetType().isEnum()) {
+            List<String> allowedValues = Stream.of(ife.getTargetType().getEnumConstants())
+                    .map(Object::toString)
+                    .toList();
+
+            String message = String.format("Invalid value %s. Allowed values are: %s", ife.getValue(), allowedValues);
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+        }
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Invalid request");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        return errors;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public String handleException(Exception ex) {
+        return ex.getMessage();
+    }
+
+
+}
