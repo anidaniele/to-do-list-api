@@ -1,13 +1,14 @@
 package com.example.to_do_list_api.service;
 
-import com.example.to_do_list_api.domain.exceptions.ResourceNotFoundException;
+import com.example.to_do_list_api.domain.exceptions.TaskNotFoundException;
 import com.example.to_do_list_api.persistence.Task;
 import com.example.to_do_list_api.domain.TaskRepository;
 import com.example.to_do_list_api.persistence.User;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,23 +21,19 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task getTaskByIdForUser(int id, User user) {
         return taskRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " was not found or user doesn't have authorization to access it"));
+                .orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     @Override
     public Task getTaskById(int id) {
         return taskRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Task with id " + id + " was not found or user doesn't have authorization to access it"));
+                new TaskNotFoundException(id));
     }
 
-    @Override
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
 
     @Override
-    public List<Task> getAllTasksByUser(User user) {
-        return taskRepository.findAllByUser(user);
+    public Page<Task> getAllTasksByUser(User user, Pageable pageable) {
+        return taskRepository.findAllByUser(user, pageable);
     }
 
     @Override
@@ -45,12 +42,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void deleteTaskById(int id) {
-        Optional<Task> task = taskRepository.findById(id);
+    public void deleteTaskById(int id, User user) {
+        Optional<Task> task = taskRepository.findByIdAndUser(id, user);
         if (task.isPresent()) {
             taskRepository.deleteById(id);
         }
-        else throw new ResourceNotFoundException("Task with id " + id + " does not exist or user doesn't have authorization to access it");
+        else throw new TaskNotFoundException(id);
     }
 
 }

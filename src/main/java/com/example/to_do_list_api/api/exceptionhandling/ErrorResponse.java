@@ -1,19 +1,16 @@
 package com.example.to_do_list_api.api.exceptionhandling;
 
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import org.springframework.http.HttpStatus;
 
 @Data
 public class ErrorResponse {
 
-    private int status;
+    private HttpStatus status;
     private String message;
-    private LocalDateTime timestamp;
 
-    public ErrorResponse(int status, String message) {
+    public ErrorResponse(HttpStatus status, String message) {
         this.status = status;
         this.message = message;
-        this.timestamp = LocalDateTime.now();
     }
 }

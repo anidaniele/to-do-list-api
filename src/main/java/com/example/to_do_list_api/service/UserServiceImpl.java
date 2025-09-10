@@ -2,7 +2,7 @@ package com.example.to_do_list_api.service;
 
 import com.example.to_do_list_api.domain.auth.UserRepository;
 import com.example.to_do_list_api.domain.exceptions.EmailExistsException;
-import com.example.to_do_list_api.domain.exceptions.ResourceNotFoundException;
+import com.example.to_do_list_api.domain.exceptions.UserNotFoundException;
 import com.example.to_do_list_api.persistence.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +25,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " was not found"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
     }
 }

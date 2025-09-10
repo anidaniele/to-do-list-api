@@ -16,12 +16,10 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
 
     public AuthResponseDto authenticate(AuthRequestDto authRequestDto) {
-        var token = new UsernamePasswordAuthenticationToken(authRequestDto.getEmail(), authRequestDto.getPassword());
+        var token = new UsernamePasswordAuthenticationToken(authRequestDto.email(), authRequestDto.password());
         Authentication authentication = authenticationManager.authenticate(token);
-
         String jwtToken = jwtTokenService.generateToken(authentication);
-        Long expiresAt = jwtTokenService.extractExpirationTimestamp(jwtToken);
 
-        return new AuthResponseDto(jwtToken, expiresAt);
+        return new AuthResponseDto(jwtToken);
     }
 }

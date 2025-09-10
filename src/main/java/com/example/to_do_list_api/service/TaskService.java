@@ -3,8 +3,8 @@ package com.example.to_do_list_api.service;
 
 import com.example.to_do_list_api.persistence.Task;
 import com.example.to_do_list_api.persistence.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TaskService {
 
@@ -12,12 +12,11 @@ public interface TaskService {
 
     Task getTaskById(int id);
 
-    List<Task> getAllTasks();
-    List<Task> getAllTasksByUser(User user);
+    Page<Task> getAllTasksByUser(User user, Pageable pageable);
 
     Task addTask(Task task);
 
-    void deleteTaskById(int id);
+    void deleteTaskById(int id, User user);
 
 
 

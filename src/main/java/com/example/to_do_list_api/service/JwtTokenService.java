@@ -14,7 +14,6 @@ import java.time.temporal.ChronoUnit;
 public class JwtTokenService {
 
     private final JwtEncoder encoder;
-    private final JwtDecoder decoder;
 
     public String generateToken(Authentication authentication) {
         Instant now = Instant.now();
@@ -28,11 +27,5 @@ public class JwtTokenService {
                 .build();
         var encoderParameters = JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims);
         return this.encoder.encode(encoderParameters).getTokenValue();
-    }
-
-    public Long extractExpirationTimestamp(String token) {
-        Jwt jwt = decoder.decode(token);
-        var exp = (Instant) jwt.getClaim("exp");
-        return exp.toEpochMilli();
     }
 }

@@ -3,6 +3,8 @@ package com.example.to_do_list_api.api.exceptionhandling;
 import com.example.to_do_list_api.domain.exceptions.EmailExistsException;
 import com.example.to_do_list_api.domain.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -19,16 +21,19 @@ import java.util.stream.Stream;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public ErrorResponse handleException(ResourceNotFoundException ex) {
-        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return new ErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(EmailExistsException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(EmailExistsException ex) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     @ExceptionHandler(InvalidFormatException.class)
@@ -41,9 +46,9 @@ public class GlobalExceptionHandler {
                     .toList();
 
             String message = String.format("Invalid value %s. Allowed values are: %s", ife.getValue(), allowedValues);
-            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+            return new ErrorResponse(HttpStatus.BAD_REQUEST, message);
         }
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Invalid request");
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -57,9 +62,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    public String handleException(Exception ex) {
-        return ex.getMessage();
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception ex) {
+        logger.error("Unknown error occurred: ", ex);
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error occurred");
     }
 
 
