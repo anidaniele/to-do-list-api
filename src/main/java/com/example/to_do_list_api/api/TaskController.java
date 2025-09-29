@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class TaskController {
     private final TaskMapper taskMapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public Page<TaskResponseDto> getAllTasks(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
@@ -45,6 +47,7 @@ public class TaskController {
     }
 
     @GetMapping("/{taskId}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public TaskResponseDto getTaskById(@PathVariable int taskId, Authentication authentication) {
         String userName = authentication.getName();
         User user = userService.getUserByEmail(userName);
@@ -52,6 +55,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public Task updateTaskById(@PathVariable int taskId, @RequestBody Map<String, Object> patch) {
         if (patch.containsKey("id")) {
             throw new RuntimeException("Id is not allowed in the request");
@@ -63,10 +67,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTaskById(@PathVariable int id, Authentication authentication) {
-        String userName = authentication.getName();
-        User user = userService.getUserByEmail(userName);
-        service.deleteTaskById(id, user);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteTaskById(@PathVariable int id) {
+        service.deleteTaskById(id);
     }
 
     private Task applyPatching(Task taskToUpdate, Map<String, Object> patch) {
@@ -78,6 +81,7 @@ public class TaskController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public TaskResponseDto addTask(@Valid @RequestBody TaskRequestDto taskDto, Authentication authentication) {
         Task task = taskMapper.toEntity(taskDto);
         String userName = authentication.getName();

@@ -1,29 +1,10 @@
-version: "3.7"
-
 services:
-  app:
-    build: .
-    container_name: spring_boot_app
-    depends_on:
-      db:
-          condition: service_healthy
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/task_tracker
-      SPRING_DATASOURCE_USERNAME: app_user
-      SPRING_DATASOURCE_PASSWORD: password
-    networks:
-      - app_network
-
   db:
-    ports:
-      - "3307:3306"
     image: mysql:8.0
     container_name: mysql_db
     restart: always
-    networks:
-      - app_network
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: task_tracker
       MYSQL_USER: app_user
@@ -37,9 +18,5 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-
-networks:
-  app_network:
-
 volumes:
   db_data:

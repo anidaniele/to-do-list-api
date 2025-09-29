@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -59,6 +61,18 @@ public class GlobalExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         return errors;
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    @ResponseStatus(code = HttpStatus.FORBIDDEN)
+    public ErrorResponse handleException(AuthorizationDeniedException ex) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN, "User is not allowed to perform this action");
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleException(BadCredentialsException ex) {
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED, "User is not recognized");
     }
 
     @ExceptionHandler

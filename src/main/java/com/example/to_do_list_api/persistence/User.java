@@ -1,5 +1,6 @@
 package com.example.to_do_list_api.persistence;
 
+import com.example.to_do_list_api.domain.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,10 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     @Column(name = "tasks")
